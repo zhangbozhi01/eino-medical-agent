@@ -8,26 +8,20 @@ import (
 	"github.com/cloudwego/eino-ext/components/tool/browseruse"
 )
 
-// LoadAll 加载所有工具：浏览器、MCP、医学专用工具
+// LoadAll 加载所有工具：浏览器、医学专用工具
 func LoadAll(ctx context.Context) ([]tool.BaseTool, error) {
 	var tools []tool.BaseTool
 
-	// 1. 官方 BrowserUse Tool
+	// 医学工具（优先）
+	tools = append(tools, NewMedicalTools()...)
+
+	// 浏览器工具（可选，失败不阻断）
 	browserTool, err := browseruse.NewBrowserUseTool(ctx, &browseruse.Config{})
 	if err != nil {
-		fmt.Printf("警告: 浏览器工具初始化失败: %v\n", err)
+		fmt.Printf("警告: 浏览器工具初始化失败（可能缺少 Chrome）: %v\n", err)
 	} else {
 		tools = append(tools, browserTool)
 	}
-
-	// 2. MCP 工具（示例：可接入 Playwright / Desktop / Shell MCP）
-	// mcpTools, err := loadMCPTools(ctx)
-	// if err == nil {
-	// 	tools = append(tools, mcpTools...)
-	// }
-
-	// 3. 医学专用工具（预留）
-	// tools = append(tools, NewMedicalKnowledgeTool(), NewReportAnalysisTool())
 
 	if len(tools) == 0 {
 		return nil, fmt.Errorf("没有可用的工具")
